@@ -87,7 +87,6 @@ async function buyma() {
       );
 
       totalProducts.push(product);
-
       await page.close();
     }
 
