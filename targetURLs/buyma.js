@@ -4,7 +4,6 @@ const dayjs = require('dayjs');
 const TemporaryOtherSellerProductCount = require('../models/temporaryOtherSellerProductCount');
 const OtherSellerProductTodayCount = require('../models/otherSellerProductTodayCount');
 const OtherSellerProduct = require('../models/otherSellerProduct');
-const OtherSeller = require('../models/otherSeller');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
 
@@ -61,7 +60,7 @@ async function buyma() {
         throw 'Failed to load page!';
       }
 
-      await page.waitForTimeout(20000); // 없으면 크롤링 안됨
+      await page.waitForTimeout(10000); // 없으면 크롤링 안됨
       // 데이터 크롤링
       console.log('데이터 크롤링 시작.');
       let buymaProductId = productIdResultArr[i].buyma_product_id;
@@ -127,7 +126,7 @@ async function buyma() {
             where: { buyma_product_id: product.buymaProductId },
           });
 
-          await OtherSellerProductTodayCount.create({
+          await OtherSellerProductTodayCount.upsert({
             other_seller_product_id: productResult.id,
             buyma_product_id: product.buymaProductId,
             buyma_product_name: product.buymaProductName,
@@ -163,7 +162,7 @@ async function buyma() {
     for (let product of totalProducts) {
       if (product.buymaProductId) {
         try {
-          await TemporaryOtherSellerProductCount.create({
+          await TemporaryOtherSellerProductCount.upsert({
             buyma_product_id: product.buymaProductId,
             buyma_product_name: product.buymaProductName,
             today: product.today,
