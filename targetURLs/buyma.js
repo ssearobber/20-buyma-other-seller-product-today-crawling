@@ -9,6 +9,7 @@ const Op = sequelize.Op;
 
 // buyma 데이터 크롤링
 async function buyma() {
+  let startTime = new Date().getTime();
   const userId = process.env.USER_ID || userId;
   let browser = {};
   let page = {};
@@ -179,6 +180,8 @@ async function buyma() {
       }
     }
     console.log('TemporaryProductCount테이블에 오늘 데이터 등록종료.');
+    let endTime = new Date().getTime();
+    console.log('총 걸린시간 : ' + endTime - startTime);
   } catch (e) {
     console.log(e);
     await page.close();
