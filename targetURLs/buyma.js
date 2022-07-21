@@ -15,7 +15,7 @@ async function buyma() {
   let page = {};
 
   try {
-    //OtherSellerProduct테이블에서 데이터 취득
+    // OtherSellerProduct테이블에서 데이터 취득
     console.log('OtherSellerProduct테이블의 다른판매자ID데이터 취득시작.');
     let productIdResultArr = [];
     try {
