@@ -61,7 +61,7 @@ async function buyma() {
         throw 'Failed to load page!';
       }
 
-      await page.waitForTimeout(15000); // 없으면 크롤링 안됨
+      await page.waitForTimeout(20000); // 없으면 크롤링 안됨
       // 데이터 크롤링
       console.log('데이터 크롤링 시작.');
       let buymaProductId = productIdResultArr[i].buyma_product_id;
