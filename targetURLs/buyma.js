@@ -50,9 +50,6 @@ async function buyma() {
 
       await Promise.all(
         sliceArray.map(async (v) => {
-          // 전체 상품 리스트로 취득
-          console.log(`https://www.buyma.com/item/${v}/에 이동`);
-
           let page = await browser.newPage();
           // await page.setViewport({
           //   width: 1480,
@@ -69,7 +66,7 @@ async function buyma() {
 
           // await page.waitForTimeout(20000); // 없으면 크롤링 안됨
           // 데이터 크롤링
-          console.log('데이터 크롤링 시작.');
+          console.log(`https://www.buyma.com/item/${v}/ 데이터 크롤링 시작.`);
           let buymaProductId = v;
           product = await page.evaluate(
             (today, buymaProductId) => {
@@ -195,13 +192,12 @@ async function buyma() {
     }
     let DBinsertEndTime2 = new Date().getTime();
     console.log(
-      'OtherSellerProductTodayCount테이블 입력 총 걸린시간 : ' +
-        DBinsertEndTime2 -
-        DBinsertStartTime2,
+      'OtherSellerProductTodayCount테이블 입력 총 걸린시간 : ',
+      (((DBinsertEndTime2 - DBinsertStartTime2) / (1000 * 60)) % 60) + '분',
     );
     console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록종료.');
     let endTime = new Date().getTime();
-    console.log('총 걸린시간 : ' + endTime - startTime);
+    console.log('총 걸린시간 : ', (((endTime - startTime) / (1000 * 60)) % 60) + '분');
   } catch (e) {
     console.log(e);
     await page.close();
