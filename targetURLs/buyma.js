@@ -17,15 +17,21 @@ async function buyma() {
   try {
     // OtherSellerProduct테이블에서 데이터 취득
     console.log('OtherSellerProduct테이블의 다른판매자ID데이터 취득시작.');
-    let productIdResultArr = [];
+    let objOfproductIdResultArr = [];
     try {
-      productIdResultArr = await OtherSellerProduct.findAll({
-        attributes: ['buyma_product_id', 'buyma_product_name'],
+      objOfproductIdResultArr = await OtherSellerProduct.findAll({
+        attributes: ['buyma_product_id'],
       });
     } catch (e) {
       console.log('OtherSellerProduct select all error', e);
     }
     console.log('OtherSellerProduct테이블의 다른판매자ID데이터 취득종료.');
+
+    // [{buyma_product_id: '123123'},{buyma_product_id: '123123'}...] ==> ['123123','123123'..]
+    let productIdResultArr = [];
+    for (productIdObj of objOfproductIdResultArr) {
+      productIdResultArr.push(productIdObj.buyma_product_id);
+    }
 
     browser = await puppeteer.launch({
       headless: true,
@@ -39,55 +45,55 @@ async function buyma() {
 
     let totalProducts = [];
     let today = dayjs().format('YYYY/MM/DD');
-    for (let i = 0; i < productIdResultArr.length; i++) {
-      // 전체 상품 리스트로 취득
-      let product = [];
-      console.log(`https://www.buyma.com/item/${productIdResultArr[i].buyma_product_id}/에 이동`);
+    for (let i = 0; i < productIdResultArr.length; i += 10) {
+      let sliceArray = productIdResultArr.slice(i, i + 10);
 
-      page = await browser.newPage();
-      // await page.setViewport({
-      //   width: 1480,
-      //   height: 1080,
-      // });
-      await page.setDefaultNavigationTimeout(0);
-      let response = await page.goto(
-        `https://www.buyma.com/item/${productIdResultArr[i].buyma_product_id}/`,
-        {
-          waitUntil: 'networkidle0',
-          // timeout: 30000,
-        },
+      await Promise.all(
+        sliceArray.map(async (v) => {
+          // 전체 상품 리스트로 취득
+          console.log(`https://www.buyma.com/item/${v}/에 이동`);
+
+          let page = await browser.newPage();
+          // await page.setViewport({
+          //   width: 1480,
+          //   height: 1080,
+          // });
+          await page.setDefaultNavigationTimeout(0);
+          let response = await page.goto(`https://www.buyma.com/item/${v}/`, {
+            waitUntil: 'networkidle0',
+            // timeout: 30000,
+          });
+          if (!response) {
+            throw 'Failed to load page!';
+          }
+
+          // await page.waitForTimeout(20000); // 없으면 크롤링 안됨
+          // 데이터 크롤링
+          console.log('데이터 크롤링 시작.');
+          let buymaProductId = v;
+          product = await page.evaluate(
+            (today, buymaProductId) => {
+              let product = {};
+              product.buymaProductId = buymaProductId;
+              product.buymaProductName = document.querySelector('#content h1').textContent;
+              product.today = today;
+              product.wish = document
+                .querySelector('.topMenuWrap ul li:nth-of-type(2) span')
+                .textContent.replace(/,|人/g, '');
+              product.access = document
+                .querySelector('.topMenuWrap ul li:nth-of-type(1) a')
+                .textContent.replace(/,/g, '');
+              product.link = `https://www.buyma.com/item/${buymaProductId}`;
+              return product;
+            },
+            today,
+            buymaProductId,
+          );
+
+          totalProducts.push(product);
+          await page.close();
+        }),
       );
-      if (!response) {
-        throw 'Failed to load page!';
-      }
-
-      await page.waitForTimeout(20000); // 없으면 크롤링 안됨
-      // 데이터 크롤링
-      console.log('데이터 크롤링 시작.');
-      let buymaProductId = productIdResultArr[i].buyma_product_id;
-      let buymaProductName = productIdResultArr[i].buyma_product_name;
-      product = await page.evaluate(
-        (today, buymaProductId, buymaProductName) => {
-          let product = {};
-          product.buymaProductId = buymaProductId;
-          product.buymaProductName = buymaProductName;
-          product.today = today;
-          product.wish = document
-            .querySelector('.topMenuWrap ul li:nth-of-type(2) span')
-            .textContent.replace(/,|人/g, '');
-          product.access = document
-            .querySelector('.topMenuWrap ul li:nth-of-type(1) a')
-            .textContent.replace(/,/g, '');
-          product.link = `https://www.buyma.com/item/${buymaProductId}`;
-          return product;
-        },
-        today,
-        buymaProductId,
-        buymaProductName,
-      );
-
-      totalProducts.push(product);
-      await page.close();
     }
 
     await browser.close();
@@ -108,6 +114,7 @@ async function buyma() {
 
     // ProductTodayCount테이블에 오늘 증가 데이터 등록
     console.log('OtherSellerProductTodayCount테이블에 증가데이터 입력시작.');
+    let DBinsertStartTime = new Date().getTime();
     let wish = 0;
     let access = 0;
     for (let product of totalProducts) {
@@ -145,6 +152,12 @@ async function buyma() {
         }
       }
     }
+    let DBinsertEndTime = new Date().getTime();
+    console.log(
+      'OtherSellerProductTodayCount테이블 입력 총 걸린시간 : ' +
+        DBinsertEndTime -
+        DBinsertStartTime,
+    );
     console.log('OtherSellerProductTodayCount테이블에 증가데이터 입력종료.');
 
     // 어제 데이터 삭제 (전체 데이터 삭제)
@@ -160,6 +173,7 @@ async function buyma() {
     console.log('TemporaryOtherSellerProductCount테이블의 어제 데이터 삭제종료.');
     // 오늘 데이터 등록
     console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록시작.');
+    let DBinsertStartTime2 = new Date().getTime();
     for (let product of totalProducts) {
       if (product.buymaProductId) {
         try {
@@ -179,7 +193,13 @@ async function buyma() {
         }
       }
     }
-    console.log('TemporaryProductCount테이블에 오늘 데이터 등록종료.');
+    let DBinsertEndTime2 = new Date().getTime();
+    console.log(
+      'OtherSellerProductTodayCount테이블 입력 총 걸린시간 : ' +
+        DBinsertEndTime2 -
+        DBinsertStartTime2,
+    );
+    console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록종료.');
     let endTime = new Date().getTime();
     console.log('총 걸린시간 : ' + endTime - startTime);
   } catch (e) {
