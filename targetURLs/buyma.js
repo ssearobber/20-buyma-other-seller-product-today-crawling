@@ -46,7 +46,7 @@ async function buyma() {
 
     let totalProducts = [];
     let today = dayjs().format('YYYY/MM/DD');
-    let tabOpenNum = process.env.TAB_OPEN_NUM || tabOpenNum;
+    let tabOpenNum = Number(process.env.TAB_OPEN_NUM || tabOpenNum);
     for (let i = 0; i < productIdResultArr.length; i += tabOpenNum) {
       let sliceArray = productIdResultArr.slice(i, i + tabOpenNum);
 
