@@ -93,7 +93,9 @@ async function buyma() {
           await page.close();
           console.log(`https://www.buyma.com/item/${v}/ 페이지 종료`);
         }),
-      );
+      ).catch((err) => {
+        console.log('Error in Promises.all: ', err);
+      });
     }
 
     await browser.close();
