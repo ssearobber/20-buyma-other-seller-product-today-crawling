@@ -6,6 +6,7 @@ const OtherSellerProductTodayCount = require('../models/otherSellerProductTodayC
 const OtherSellerProduct = require('../models/otherSellerProduct');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
+require('dotenv').config();
 
 // buyma 데이터 크롤링
 async function buyma() {
@@ -45,8 +46,9 @@ async function buyma() {
 
     let totalProducts = [];
     let today = dayjs().format('YYYY/MM/DD');
-    for (let i = 0; i < productIdResultArr.length; i += 5) {
-      let sliceArray = productIdResultArr.slice(i, i + 5);
+    let tabOpenNum = process.env.TAB_OPEN_NUM || tabOpenNum;
+    for (let i = 0; i < productIdResultArr.length; i += tabOpenNum) {
+      let sliceArray = productIdResultArr.slice(i, i + tabOpenNum);
 
       await Promise.all(
         sliceArray.map(async (v) => {
@@ -66,7 +68,7 @@ async function buyma() {
 
           // await page.waitForTimeout(20000); // 없으면 크롤링 안됨
           // 데이터 크롤링
-          console.log(`https://www.buyma.com/item/${v}/ 데이터 크롤링 시작.`);
+          console.log(`https://www.buyma.com/item/${v}/ 페이지에 이동`);
           let buymaProductId = v;
           product = await page.evaluate(
             (today, buymaProductId) => {
@@ -89,6 +91,7 @@ async function buyma() {
 
           totalProducts.push(product);
           await page.close();
+          console.log(`https://www.buyma.com/item/${v}/ 페이지 종료`);
         }),
       );
     }
