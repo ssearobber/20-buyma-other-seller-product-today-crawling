@@ -45,8 +45,8 @@ async function buyma() {
 
     let totalProducts = [];
     let today = dayjs().format('YYYY/MM/DD');
-    for (let i = 0; i < productIdResultArr.length; i += 10) {
-      let sliceArray = productIdResultArr.slice(i, i + 10);
+    for (let i = 0; i < productIdResultArr.length; i += 5) {
+      let sliceArray = productIdResultArr.slice(i, i + 5);
 
       await Promise.all(
         sliceArray.map(async (v) => {
