@@ -21,7 +21,7 @@ async function buyma() {
     let objOfproductIdResultArr = [];
     try {
       objOfproductIdResultArr = await OtherSellerProduct.findAll({
-        attributes: ['buyma_product_id'],
+        attributes: ['other_seller_id', 'buyma_product_id'],
       });
     } catch (e) {
       console.log('OtherSellerProduct select all error', e);
@@ -32,6 +32,11 @@ async function buyma() {
     let productIdResultArr = [];
     for (productIdObj of objOfproductIdResultArr) {
       productIdResultArr.push(productIdObj.buyma_product_id);
+    }
+
+    let productIdResultArrSlice1;
+    if (productIdResultArr.length) {
+      productIdResultArrSlice1 = productIdResultArr.slice(0, productIdResultArr.length / 5);
     }
 
     browser = await puppeteer.launch({
@@ -47,8 +52,8 @@ async function buyma() {
     let totalProducts = [];
     let today = dayjs().format('YYYY/MM/DD');
     let tabOpenNum = Number(process.env.TAB_OPEN_NUM || tabOpenNum);
-    for (let i = 0; i < productIdResultArr.length; i += tabOpenNum) {
-      let sliceArray = productIdResultArr.slice(i, i + tabOpenNum);
+    for (let i = 0; i < productIdResultArrSlice1.length; i += tabOpenNum) {
+      let sliceArray = productIdResultArrSlice1.slice(i, i + tabOpenNum);
 
       console.log(
         '현재 메모리 사용량(Promise.all 밖) ' +
