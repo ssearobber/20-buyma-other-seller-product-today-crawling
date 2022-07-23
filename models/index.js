@@ -1,8 +1,8 @@
 const Sequelize = require('sequelize');
+const OtherSeller = require('./otherSeller');
 const TemporaryOtherSellerProductCount = require('./temporaryOtherSellerProductCount');
 const OtherSellerProductTodayCount = require('./otherSellerProductTodayCount');
 const OtherSellerProduct = require('./otherSellerProduct');
-const OtherSeller = require('./otherSeller');
 
 const env = process.env.NODE_ENV || 'development';
 const config = require('../config/config')[env];

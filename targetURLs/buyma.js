@@ -195,6 +195,7 @@ async function buyma() {
       'OtherSellerProductTodayCount테이블 입력 총 걸린시간 : ',
       (((DBinsertEndTime2 - DBinsertStartTime2) / (1000 * 60)) % 60) + '분',
     );
+
     console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록종료.');
     let endTime = new Date().getTime();
     console.log('총 걸린시간 : ', (((endTime - startTime) / (1000 * 60)) % 60) + '분');
