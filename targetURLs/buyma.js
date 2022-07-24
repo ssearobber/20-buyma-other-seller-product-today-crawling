@@ -55,7 +55,7 @@ async function buyma() {
     for (let i = 0; i < productIdResultArrSlice1.length; i += tabOpenNum) {
       let sliceArray = productIdResultArrSlice1.slice(i, i + tabOpenNum);
 
-      console.log('총 갯수 : productIdResultArrSlice1.length' + '\n' + '');
+      console.log('총 갯수 : ' + productIdResultArrSlice1.length + '\n' + i + '번째');
 
       await Promise.all(
         sliceArray.map(async (v) => {
