@@ -55,29 +55,8 @@ async function buyma() {
     for (let i = 0; i < productIdResultArrSlice1.length; i += tabOpenNum) {
       let sliceArray = productIdResultArrSlice1.slice(i, i + tabOpenNum);
 
-      console.log(
-        '현재 메모리 사용량(Promise.all 밖) ' +
-          '\n' +
-          'rss : ' +
-          process.memoryUsage().rss / 1024 / 1024 +
-          'MB' +
-          '\n' +
-          'heapTotal : ' +
-          process.memoryUsage().heapTotal / 1024 / 1024 +
-          'MB' +
-          '\n' +
-          'heapUsed : ' +
-          process.memoryUsage().heapUsed / 1024 / 1024 +
-          'MB' +
-          '\n' +
-          'external : ' +
-          process.memoryUsage().external / 1024 / 1024 +
-          'MB' +
-          '\n' +
-          'arrayBuffers : ' +
-          process.memoryUsage().arrayBuffers / 1024 / 1024 +
-          'MB',
-      );
+      console.log('총 갯수 : productIdResultArrSlice1.length' + '\n' + '');
+
       await Promise.all(
         sliceArray.map(async (v) => {
           let page = await browser.newPage();
@@ -244,5 +223,29 @@ async function buyma() {
     await browser.close();
   }
 }
+
+// console.log(
+//   '현재 메모리 사용량(Promise.all 밖) ' +
+//     '\n' +
+//     'rss : ' +
+//     process.memoryUsage().rss / 1024 / 1024 +
+//     'MB' +
+//     '\n' +
+//     'heapTotal : ' +
+//     process.memoryUsage().heapTotal / 1024 / 1024 +
+//     'MB' +
+//     '\n' +
+//     'heapUsed : ' +
+//     process.memoryUsage().heapUsed / 1024 / 1024 +
+//     'MB' +
+//     '\n' +
+//     'external : ' +
+//     process.memoryUsage().external / 1024 / 1024 +
+//     'MB' +
+//     '\n' +
+//     'arrayBuffers : ' +
+//     process.memoryUsage().arrayBuffers / 1024 / 1024 +
+//     'MB',
+// );
 
 module.exports.buyma = buyma;
