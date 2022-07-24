@@ -34,10 +34,11 @@ async function buyma() {
       productIdResultArr.push(productIdObj.buyma_product_id);
     }
 
-    let productIdResultArrSlice1;
-    if (productIdResultArr.length) {
-      productIdResultArrSlice1 = productIdResultArr.slice(0, productIdResultArr.length / 5);
-    }
+    // 총 배열 나누기.
+    // let productIdResultArrSlice1;
+    // if (productIdResultArr.length) {
+    //   productIdResultArrSlice1 = productIdResultArr.slice(0, productIdResultArr.length / 5);
+    // }
 
     browser = await puppeteer.launch({
       headless: true,
@@ -52,10 +53,10 @@ async function buyma() {
     let totalProducts = [];
     let today = dayjs().format('YYYY/MM/DD');
     let tabOpenNum = Number(process.env.TAB_OPEN_NUM || tabOpenNum);
-    for (let i = 0; i < productIdResultArrSlice1.length; i += tabOpenNum) {
-      let sliceArray = productIdResultArrSlice1.slice(i, i + tabOpenNum);
+    for (let i = 0; i < productIdResultArr.length; i += tabOpenNum) {
+      let sliceArray = productIdResultArr.slice(i, i + tabOpenNum);
 
-      console.log('총 갯수 : ' + productIdResultArrSlice1.length + '\n' + i + '번째');
+      console.log('총 갯수 : ' + productIdResultArr.length + '\n' + i + '번째');
 
       await Promise.all(
         sliceArray.map(async (v) => {
