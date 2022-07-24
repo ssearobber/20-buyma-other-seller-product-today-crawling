@@ -102,14 +102,20 @@ async function buyma() {
             (today, buymaProductId) => {
               let product = {};
               product.buymaProductId = buymaProductId;
-              product.buymaProductName = document.querySelector('#content h1').textContent;
+              product.buymaProductName =
+                document.querySelector('#content h1') &&
+                document.querySelector('#content h1').textContent;
               product.today = today;
-              product.wish = document
-                .querySelector('.topMenuWrap ul li:nth-of-type(2) span')
-                .textContent.replace(/,|人/g, '');
-              product.access = document
-                .querySelector('.topMenuWrap ul li:nth-of-type(1) a')
-                .textContent.replace(/,/g, '');
+              product.wish =
+                document.querySelector('.topMenuWrap ul li:nth-of-type(2) span') &&
+                document
+                  .querySelector('.topMenuWrap ul li:nth-of-type(2) span')
+                  .textContent.replace(/,|人/g, '');
+              product.access =
+                document.querySelector('.topMenuWrap ul li:nth-of-type(1) a') &&
+                document
+                  .querySelector('.topMenuWrap ul li:nth-of-type(1) a')
+                  .textContent.replace(/,/g, '');
               product.link = `https://www.buyma.com/item/${buymaProductId}`;
               return product;
             },
