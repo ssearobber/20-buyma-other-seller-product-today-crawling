@@ -6,7 +6,6 @@ const OtherSellerProductTodayCount = require('../models/otherSellerProductTodayC
 const OtherSellerProduct = require('../models/otherSellerProduct');
 const OtherSeller = require('../models/otherSeller');
 const sequelize = require('sequelize');
-const Op = sequelize.Op;
 require('dotenv').config();
 
 // buyma 데이터 크롤링
