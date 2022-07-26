@@ -37,7 +37,7 @@ async function buyma() {
     for (let k = 0; k < otherSellerResultArr.length; k++) {
       let oneSellerStartTime = new Date().getTime();
       // OtherSellerProduct테이블에서 데이터 취득
-      console.log('OtherSellerProduct테이블의 다른판매자ID데이터 취득시작.');
+      console.log('OtherSellerProduct테이블의 상품ID데이터 취득시작.');
       let objOfproductIdResultArr = [];
       try {
         objOfproductIdResultArr = await OtherSellerProduct.findAll({
@@ -47,7 +47,7 @@ async function buyma() {
       } catch (e) {
         console.log('OtherSellerProduct select all error', e);
       }
-      console.log('OtherSellerProduct테이블의 다른판매자ID데이터 취득종료.');
+      console.log('OtherSellerProduct테이블의 상품ID데이터 취득종료.');
 
       // [{buyma_product_id: '123123'},{buyma_product_id: '123123'}...] ==> ['123123','123123'..]
       let productIdResultArr = [];
@@ -56,10 +56,25 @@ async function buyma() {
       }
 
       // 총 배열 나누기.
-      // let productIdResultArrSlice1;
-      // if (productIdResultArr.length) {
-      //   productIdResultArrSlice1 = productIdResultArr.slice(0, productIdResultArr.length / 5);
-      // }
+      let productIdResultArrSlice1;
+      let productIdResultArrSlice2;
+      let productIdResultArrSlice3;
+      let productIdResultArr1of3 = Math.floor(productIdResultArr.length / 3);
+      if (productIdResultArr.length) {
+        productIdResultArrSlice1 = productIdResultArr.slice(0, productIdResultArr1of3);
+        productIdResultArrSlice2 = productIdResultArr.slice(
+          productIdResultArr1of3,
+          productIdResultArr1of3 * 2,
+        );
+        productIdResultArrSlice3 = productIdResultArr.slice(
+          productIdResultArr1of3 * 2,
+          productIdResultArr.length,
+        );
+      }
+      let arrayDivideNum = process.env.ARRAY_DIVIED_NUM || arrayDivideNum;
+      if (arrayDivideNum == '1') productIdResultArr = productIdResultArrSlice1;
+      else if (arrayDivideNum == '2') productIdResultArr = productIdResultArrSlice2;
+      else if (arrayDivideNum == '3') productIdResultArr = productIdResultArrSlice3;
 
       browser = await puppeteer.launch({
         headless: true,
