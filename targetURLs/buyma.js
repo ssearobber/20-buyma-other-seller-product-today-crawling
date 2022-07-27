@@ -55,25 +55,21 @@ async function buyma() {
       }
 
       // 총 배열 나누기.
-      let productIdResultArrSlice1;
-      let productIdResultArrSlice2;
-      let productIdResultArrSlice3;
-      let productIdResultArr1of3 = Math.floor(productIdResultArr.length / 3);
-      if (productIdResultArr.length) {
-        productIdResultArrSlice1 = productIdResultArr.slice(0, productIdResultArr1of3);
-        productIdResultArrSlice2 = productIdResultArr.slice(
-          productIdResultArr1of3,
-          productIdResultArr1of3 * 2,
-        );
-        productIdResultArrSlice3 = productIdResultArr.slice(
-          productIdResultArr1of3 * 2,
-          productIdResultArr.length,
-        );
-      }
+      let arrayDivideTotalNum = process.env.ARRAY_DIVIED_TOTAL_NUM || arrayDivideTotalNum;
       let arrayDivideNum = process.env.ARRAY_DIVIED_NUM || arrayDivideNum;
-      if (arrayDivideNum == '1') productIdResultArr = productIdResultArrSlice1;
-      else if (arrayDivideNum == '2') productIdResultArr = productIdResultArrSlice2;
-      else if (arrayDivideNum == '3') productIdResultArr = productIdResultArrSlice3;
+      let productIdResultArr1ofN = Math.floor(
+        productIdResultArr.length / Number(arrayDivideTotalNum),
+      );
+      let obj = {};
+      let arrSlice1ofN;
+      productIdResultArr = arrSlice(
+        arrayDivideTotalNum,
+        arrayDivideNum,
+        productIdResultArr1ofN,
+        obj,
+        arrSlice1ofN,
+        productIdResultArr,
+      );
 
       browser = await puppeteer.launch({
         headless: true,
@@ -138,6 +134,8 @@ async function buyma() {
               buymaProductId,
             );
 
+            product.wish ?? 0;
+            product.access ?? 0;
             totalProducts.push(product);
             await page.close();
             console.log(`https://www.buyma.com/item/${v}/ 페이지 종료`);
@@ -239,7 +237,7 @@ async function buyma() {
       console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록종료.');
       let oneSellerEndTime = new Date().getTime();
       console.log(
-        'buyma_user_id (' + otherSellerResultArr[k] + ' ) ' + '총 걸린시간 : ',
+        'buyma_user_id ( ' + otherSellerResultArr[k] + ' ) ' + '총 걸린시간 : ',
         (((oneSellerEndTime - oneSellerStartTime) / (1000 * 60)) % 60) + '분',
       );
       let endTime = new Date().getTime();
@@ -249,6 +247,39 @@ async function buyma() {
     console.log(e);
     await page.close();
     await browser.close();
+  }
+}
+
+function arrSlice(
+  arrayDivideTotalNum,
+  arrayDivideNum,
+  productIdResultArr1ofN,
+  obj,
+  arrSlice1ofN,
+  productIdResultArr,
+) {
+  if (Number(arrayDivideNum) < Number(productIdResultArr1ofN)) {
+    for (let i = 1; i <= Number(arrayDivideTotalNum); i++) {
+      if (i == Number(arrayDivideTotalNum)) {
+        arrSlice1ofN = productIdResultArr.slice(
+          productIdResultArr1ofN * (i - 1),
+          productIdResultArr.length,
+        );
+      } else {
+        arrSlice1ofN = productIdResultArr.slice(
+          productIdResultArr1ofN * (i - 1),
+          productIdResultArr1ofN * i,
+        );
+      }
+      obj['productIdResultArrSlice' + i] = arrSlice1ofN;
+    }
+  } else {
+    obj['productIdResultArrSlice' + arrayDivideNum] = productIdResultArr;
+  }
+
+  for (let i = 1; i <= Number(arrayDivideTotalNum); i++) {
+    if (Number(arrayDivideNum) == i)
+      return (productIdResultArr = obj['productIdResultArrSlice' + i]);
   }
 }
 
