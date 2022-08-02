@@ -281,7 +281,6 @@ function arrSlice(
   } else {
     obj['productIdResultArrSlice' + arrayDivideNum] = productIdResultArr;
   }
-
   // productIdResultArr에 해당arrayDivideNum의 부분을 담기
   for (let i = 1; i <= Number(arrayDivideTotalNum); i++) {
     if (Number(arrayDivideNum) == i)
