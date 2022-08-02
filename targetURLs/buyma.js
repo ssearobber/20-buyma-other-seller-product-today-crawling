@@ -84,6 +84,8 @@ async function buyma() {
       let totalProducts = [];
       let today = dayjs().format('YYYY/MM/DD');
       let tabOpenNum = Number(process.env.TAB_OPEN_NUM || tabOpenNum);
+
+      console.log('buyma 유저 넘버 : ' + otherSellerResultArr[k]);
       for (let i = 0; i < productIdResultArr.length; i += tabOpenNum) {
         let sliceArray = productIdResultArr.slice(i, i + tabOpenNum);
 
@@ -118,15 +120,17 @@ async function buyma() {
                   document.querySelector('#content h1').textContent;
                 product.today = today;
                 product.wish =
-                  document.querySelector('.topMenuWrap ul li:nth-of-type(2) span') &&
-                  document
-                    .querySelector('.topMenuWrap ul li:nth-of-type(2) span')
-                    .textContent.replace(/,|人/g, '');
+                  (document.querySelector('.topMenuWrap ul li:nth-of-type(2) span') &&
+                    document
+                      .querySelector('.topMenuWrap ul li:nth-of-type(2) span')
+                      .textContent.replace(/,|人/g, '')) ??
+                  '0';
                 product.access =
-                  document.querySelector('.topMenuWrap ul li:nth-of-type(1) a') &&
-                  document
-                    .querySelector('.topMenuWrap ul li:nth-of-type(1) a')
-                    .textContent.replace(/,/g, '');
+                  (document.querySelector('.topMenuWrap ul li:nth-of-type(1) a') &&
+                    document
+                      .querySelector('.topMenuWrap ul li:nth-of-type(1) a')
+                      .textContent.replace(/,/g, '')) ??
+                  '0';
                 product.link = `https://www.buyma.com/item/${buymaProductId}`;
                 return product;
               },
@@ -134,8 +138,6 @@ async function buyma() {
               buymaProductId,
             );
 
-            product.wish ?? 0;
-            product.access ?? 0;
             totalProducts.push(product);
             await page.close();
             console.log(`https://www.buyma.com/item/${v}/ 페이지 종료`);
@@ -261,22 +263,26 @@ function arrSlice(
   if (Number(arrayDivideNum) < Number(productIdResultArr1ofN)) {
     for (let i = 1; i <= Number(arrayDivideTotalNum); i++) {
       if (i == Number(arrayDivideTotalNum)) {
+        // 총 배열 나눔 갯수(10개) 와 i=10 인 경우, 예를들어 마지막 배열
         arrSlice1ofN = productIdResultArr.slice(
           productIdResultArr1ofN * (i - 1),
           productIdResultArr.length,
         );
       } else {
+        // 총 배열 나눔 갯수(10개) 와 i!=10 인 경우, 예를들어 마지막 배열를 제외하고
         arrSlice1ofN = productIdResultArr.slice(
           productIdResultArr1ofN * (i - 1),
           productIdResultArr1ofN * i,
         );
       }
+      // obj에 10등분한 객체를 담기
       obj['productIdResultArrSlice' + i] = arrSlice1ofN;
     }
   } else {
     obj['productIdResultArrSlice' + arrayDivideNum] = productIdResultArr;
   }
 
+  // productIdResultArr에 해당arrayDivideNum의 부분을 담기
   for (let i = 1; i <= Number(arrayDivideTotalNum); i++) {
     if (Number(arrayDivideNum) == i)
       return (productIdResultArr = obj['productIdResultArrSlice' + i]);
