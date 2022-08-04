@@ -127,16 +127,18 @@ async function buyma() {
       console.log('OtherSellerProductTodayCount테이블에 증가데이터 입력종료.');
 
       // 어제 데이터 삭제 (전체 데이터 삭제)
-      console.log('TemporaryOtherSellerProductCount테이블의 어제 데이터 삭제시작.');
-      try {
-        await TemporaryOtherSellerProductCount.destroy({
-          where: {},
-          truncate: true,
-        });
-      } catch (e) {
-        console.log('delete error', e);
+      if (k == 0) {
+        console.log('TemporaryOtherSellerProductCount테이블의 어제 데이터 삭제시작.');
+        try {
+          await TemporaryOtherSellerProductCount.destroy({
+            where: {},
+            truncate: true,
+          });
+        } catch (e) {
+          console.log('delete error', e);
+        }
+        console.log('TemporaryOtherSellerProductCount테이블의 어제 데이터 삭제종료.');
       }
-      console.log('TemporaryOtherSellerProductCount테이블의 어제 데이터 삭제종료.');
       // 오늘 데이터 등록
       console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록시작.');
       let DBinsertStartTime2 = new Date().getTime();
