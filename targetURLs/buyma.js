@@ -80,7 +80,7 @@ async function buyma() {
       console.log('데이터 크롤링 종료.');
 
       console.log('OtherSellerProductTodayCount테이블에 증가데이터 입력시작.');
-      let DBinsertStartTime = new Date().getTime();
+      console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록,변경시작.');
       let wish = 0;
       let access = 0;
       for (let product of totalProducts) {
@@ -91,7 +91,30 @@ async function buyma() {
             });
 
             if (!result) {
+              await TemporaryOtherSellerProductCount.create({
+                buyma_product_id: product.buymaProductId,
+                buyma_product_name: product.buymaProductName,
+                today: product.today,
+                wish: product.wish,
+                access: product.access,
+                create_id: 'crawling',
+                date_created: today,
+                update_id: 'crawling',
+                last_updated: today,
+              });
             } else {
+              await TemporaryOtherSellerProductCount.update(
+                {
+                  wish: product.wish,
+                  access: product.access,
+                  create_id: 'crawling',
+                  date_created: today,
+                  update_id: 'crawling',
+                  last_updated: today,
+                },
+                { where: { buyma_product_id: product.buymaProductId } },
+              );
+
               wish = Number(product.wish) - Number(result.wish);
               access = Number(product.access) - Number(result.access);
             }
@@ -101,7 +124,7 @@ async function buyma() {
             });
 
             await OtherSellerProductTodayCount.create({
-              other_seller_product_id: productResult.id,
+              other_seller_product_id: productResult.other_seller_id,
               buyma_product_id: product.buymaProductId,
               buyma_product_name: product.buymaProductName,
               today: product.today,
@@ -114,47 +137,13 @@ async function buyma() {
               last_updated: today,
             });
           } catch (e) {
-            console.log('오늘 증가 데이터 에러 : ', e);
+            console.log('DB처리 에러 : ', e);
           }
         }
       }
-      let DBinsertEndTime = new Date().getTime();
-      console.log(
-        'OtherSellerProductTodayCount테이블 입력 총 걸린시간 : ' +
-          DBinsertEndTime -
-          DBinsertStartTime,
-      );
+      console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록,변경종료.');
       console.log('OtherSellerProductTodayCount테이블에 증가데이터 입력종료.');
 
-      // 오늘 데이터 등록
-      console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록시작.');
-      let DBinsertStartTime2 = new Date().getTime();
-      for (let product of totalProducts) {
-        if (product.buymaProductId) {
-          try {
-            await TemporaryOtherSellerProductCount.create({
-              buyma_product_id: product.buymaProductId,
-              buyma_product_name: product.buymaProductName,
-              today: product.today,
-              wish: product.wish,
-              access: product.access,
-              create_id: 'crawling',
-              date_created: today,
-              update_id: 'crawling',
-              last_updated: today,
-            });
-          } catch (e) {
-            console.log('insert error', e);
-          }
-        }
-      }
-      let DBinsertEndTime2 = new Date().getTime();
-      console.log(
-        'OtherSellerProductTodayCount테이블 입력 총 걸린시간 : ',
-        (((DBinsertEndTime2 - DBinsertStartTime2) / (1000 * 60)) % 60) + '분',
-      );
-
-      console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록종료.');
       let oneSellerEndTime = new Date().getTime();
       console.log(
         'buyma_user_id ( ' + otherSellerIdArr[k] + ' ) ' + '총 걸린시간 : ',
