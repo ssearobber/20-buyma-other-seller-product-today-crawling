@@ -31,13 +31,13 @@ async function buyma() {
       // 총 배열 나누기.
       let arrayDivideTotalNum = process.env.ARRAY_DIVIED_TOTAL_NUM || arrayDivideTotalNum;
       let arrayDivideNum = process.env.ARRAY_DIVIED_NUM || arrayDivideNum;
-      let productIdArr1ofN = Math.floor(productIdArr.length / Number(arrayDivideTotalNum));
+      let productIdArr1ofNNum = Math.floor(productIdArr.length / Number(arrayDivideTotalNum));
       let obj = {};
       let productIdArrSliceNofN;
       productIdArr = await getProductIdArrSlice(
         arrayDivideTotalNum,
         arrayDivideNum,
-        productIdArr1ofN,
+        productIdArr1ofNNum,
         obj,
         productIdArrSliceNofN,
         productIdArr,
@@ -107,8 +107,6 @@ async function buyma() {
                 {
                   wish: product.wish,
                   access: product.access,
-                  create_id: 'crawling',
-                  date_created: today,
                   update_id: 'crawling',
                   last_updated: today,
                 },
@@ -233,25 +231,30 @@ async function doCrawlingAndgetTotalProducts(v, page, today, totalProducts) {
 async function getProductIdArrSlice(
   arrayDivideTotalNum,
   arrayDivideNum,
-  productIdArr1ofN,
+  productIdArr1ofNNum,
   obj,
   productIdArrSliceNofN,
   productIdArr,
 ) {
-  if (Number(arrayDivideNum) < Number(productIdArr1ofN)) {
+  if (Number(arrayDivideNum) < Number(productIdArr1ofNNum)) {
     for (let i = 1; i <= Number(arrayDivideTotalNum); i++) {
       if (i == Number(arrayDivideTotalNum)) {
         // 총 배열 나눔 갯수(10개) 와 i=10 인 경우, 예를들어 마지막 배열
-        productIdArrSliceNofN = productIdArr.slice(productIdArr1ofN * (i - 1), productIdArr.length);
+        productIdArrSliceNofN = productIdArr.slice(
+          productIdArr1ofNNum * (i - 1),
+          productIdArr.length,
+        );
+        // obj에 10등분한 객체를 담기
+        obj['productIdArrSlice' + i] = productIdArrSliceNofN;
       } else {
         // 총 배열 나눔 갯수(10개) 와 i!=10 인 경우, 예를들어 마지막 배열를 제외하고
         productIdArrSliceNofN = productIdArr.slice(
-          productIdArr1ofN * (i - 1),
-          productIdArr1ofN * i,
+          productIdArr1ofNNum * (i - 1),
+          productIdArr1ofNNum * i,
         );
+        // obj에 10등분한 객체를 담기
+        obj['productIdArrSlice' + i] = productIdArrSliceNofN;
       }
-      // obj에 10등분한 객체를 담기
-      obj['productIdArrSlice' + i] = productIdArrSliceNofN;
     }
   } else {
     obj['productIdArrSlice' + arrayDivideNum] = productIdArr;
