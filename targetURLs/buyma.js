@@ -10,6 +10,10 @@ require('dotenv').config();
 // buyma 데이터 크롤링
 async function buyma() {
   let startTime = new Date().getTime();
+  let productIdArrTotalCount = 0;
+  let dbTemArrTotalCount = 0;
+  let dbTemUpdateArrTotalCount = 0;
+  let dbTodayArrTotalCount = 0;
   let browser = {};
   let page = {};
 
@@ -81,7 +85,7 @@ async function buyma() {
 
       //test
       let dbTemArr = [];
-      let dbArr = [];
+      let dbTodayArr = [];
       let wish = 0;
       let access = 0;
       for (let product of totalProducts) {
@@ -90,6 +94,7 @@ async function buyma() {
             let result = await TemporaryOtherSellerProductCount.findOne({
               where: { buyma_product_id: product.buymaProductId },
             });
+
             if (!result) {
               let dbTemObj = {};
               dbTemObj.buyma_product_id = product.buymaProductId;
@@ -103,6 +108,7 @@ async function buyma() {
               dbTemObj.last_updated = today;
               dbTemArr.push(dbTemObj);
             } else {
+              dbTemUpdateArrTotalCount++;
               await TemporaryOtherSellerProductCount.update(
                 {
                   wish: product.wish,
@@ -116,19 +122,20 @@ async function buyma() {
               wish = Number(product.wish) - Number(result.wish);
               access = Number(product.access) - Number(result.access);
             }
-            let dbObj = {};
-            dbObj.other_seller_product_id = otherSellerIdArr[k];
-            dbObj.buyma_product_id = product.buymaProductId;
-            dbObj.buyma_product_name = product.buymaProductName;
-            dbObj.today = product.today;
-            dbObj.wish = wish;
-            dbObj.access = access;
-            dbObj.link = product.link;
-            dbObj.create_id = 'crawling';
-            dbObj.date_created = today;
-            dbObj.update_id = 'crawling';
-            dbObj.last_updated = today;
-            dbArr.push(dbObj);
+
+            let dbTodayObj = {};
+            dbTodayObj.other_seller_product_id = otherSellerIdArr[k];
+            dbTodayObj.buyma_product_id = product.buymaProductId;
+            dbTodayObj.buyma_product_name = product.buymaProductName;
+            dbTodayObj.today = product.today;
+            dbTodayObj.wish = wish;
+            dbTodayObj.access = access;
+            dbTodayObj.link = product.link;
+            dbTodayObj.create_id = 'crawling';
+            dbTodayObj.date_created = today;
+            dbTodayObj.update_id = 'crawling';
+            dbTodayObj.last_updated = today;
+            dbTodayArr.push(dbTodayObj);
           } catch (error) {
             console.log('DB처리 에러 : ', error);
           }
@@ -137,6 +144,7 @@ async function buyma() {
 
       console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록시작.');
       if (dbTemArr.length > 0) {
+        dbTemArrTotalCount = dbTemArrTotalCount + dbTemArr.length;
         try {
           await TemporaryOtherSellerProductCount.bulkCreate(dbTemArr);
         } catch (error) {
@@ -146,23 +154,29 @@ async function buyma() {
       console.log('TemporaryOtherSellerProductCount테이블에 오늘 데이터 등록종료.');
 
       console.log('OtherSellerProductTodayCount테이블에 증가데이터 입력시작.');
-      if (dbArr.length > 0) {
+      if (dbTodayArr.length > 0) {
+        dbTodayArrTotalCount = dbTodayArrTotalCount + dbTodayArr.length;
         try {
-          await OtherSellerProductTodayCount.bulkCreate(dbArr);
+          await OtherSellerProductTodayCount.bulkCreate(dbTodayArr);
         } catch (error) {
           console.log('DB처리 에러 : ', error);
         }
       }
       console.log('OtherSellerProductTodayCount테이블에 증가데이터 입력종료.');
 
+      productIdArrTotalCount = productIdArrTotalCount + productIdArr.length;
       let oneSellerEndTime = new Date().getTime();
       console.log(
-        'buyma_user_id ( ' + otherSellerIdArr[k] + ' ) ' + '총 걸린시간 : ',
+        'buyma_user_id ( ' + otherSellerIdArr[k] + ' ) 가 ' + '총 걸린시간 : ',
         (((oneSellerEndTime - oneSellerStartTime) / (1000 * 60)) % 60) + '분',
       );
-      let endTime = new Date().getTime();
-      console.log('총 걸린시간 : ', (((endTime - startTime) / (1000 * 60)) % 60) + '분');
     }
+    console.log('총 Temporary테이블에 insert 건수 : ' + dbTemArrTotalCount + '건');
+    console.log('총 Temporary테이블에 update 건수 : ' + dbTemUpdateArrTotalCount + '건');
+    console.log('총 Today테이블에 insert 건수 : ' + dbTodayArrTotalCount + '건');
+    console.log('총 크롤링 건 수 : ', productIdArrTotalCount + '건');
+    let endTime = new Date().getTime();
+    console.log('총 걸린시간 : ', (((endTime - startTime) / (1000 * 60)) % 60) + '분');
   } catch (e) {
     console.log(e);
     await page.close();
