@@ -58,7 +58,6 @@ async function buyma() {
       });
 
       let totalProducts = [];
-      let today = dayjs().format('YYYY/MM/DD');
       let tabOpenNum = Number(process.env.TAB_OPEN_NUM || tabOpenNum);
 
       for (let i = 0; i < productIdArr.length; i += tabOpenNum) {
@@ -73,7 +72,7 @@ async function buyma() {
             //   height: 1080,
             // });
             console.log(`https://www.buyma.com/item/${v}/ 페이지에 이동`);
-            totalProducts = await doCrawlingAndgetTotalProducts(v, page, today, totalProducts);
+            totalProducts = await doCrawlingAndgetTotalProducts(v, page, totalProducts);
             console.log(`https://www.buyma.com/item/${v}/ 페이지 종료`);
           }),
         ).catch((err) => {
@@ -95,17 +94,19 @@ async function buyma() {
               where: { buyma_product_id: product.buymaProductId },
             });
 
+            let dbDate = dayjs().format('YYYY/MM/DD HH:mm:ss');
+            let today = dayjs().format('YYYY/MM/DD HH:mm:ss');
             if (!result) {
               let dbTemObj = {};
               dbTemObj.buyma_product_id = product.buymaProductId;
               dbTemObj.buyma_product_name = product.buymaProductName;
-              dbTemObj.today = product.today;
+              dbTemObj.today = today;
               dbTemObj.wish = product.wish;
               dbTemObj.access = product.access;
               dbTemObj.create_id = 'crawling';
-              dbTemObj.date_created = today;
+              dbTemObj.date_created = dbDate;
               dbTemObj.update_id = 'crawling';
-              dbTemObj.last_updated = today;
+              dbTemObj.last_updated = dbDate;
               dbTemArr.push(dbTemObj);
             } else {
               dbTemUpdateArrTotalCount++;
@@ -114,7 +115,7 @@ async function buyma() {
                   wish: product.wish,
                   access: product.access,
                   update_id: 'crawling',
-                  last_updated: today,
+                  last_updated: dbDate,
                 },
                 { where: { buyma_product_id: product.buymaProductId } },
               );
@@ -127,14 +128,14 @@ async function buyma() {
             dbTodayObj.other_seller_product_id = otherSellerIdArr[k];
             dbTodayObj.buyma_product_id = product.buymaProductId;
             dbTodayObj.buyma_product_name = product.buymaProductName;
-            dbTodayObj.today = product.today;
+            dbTodayObj.today = today;
             dbTodayObj.wish = wish;
             dbTodayObj.access = access;
             dbTodayObj.link = product.link;
             dbTodayObj.create_id = 'crawling';
-            dbTodayObj.date_created = today;
+            dbTodayObj.date_created = dbDate;
             dbTodayObj.update_id = 'crawling';
-            dbTodayObj.last_updated = today;
+            dbTodayObj.last_updated = dbDate;
             dbTodayArr.push(dbTodayObj);
           } catch (error) {
             console.log('DB처리 에러 : ', error);
@@ -214,7 +215,7 @@ async function getProductIdArr(objOfproductIdArr, productIdArr, otherSellerIdArr
   return productIdArr;
 }
 
-async function doCrawlingAndgetTotalProducts(v, page, today, totalProducts) {
+async function doCrawlingAndgetTotalProducts(v, page, totalProducts) {
   await page.setDefaultNavigationTimeout(0);
   let response = await page.goto(`https://www.buyma.com/item/${v}/`, {
     waitUntil: 'networkidle0',
@@ -225,31 +226,26 @@ async function doCrawlingAndgetTotalProducts(v, page, today, totalProducts) {
 
   // 데이터 크롤링
   let buymaProductId = v;
-  product = await page.evaluate(
-    (today, buymaProductId) => {
-      let product = {};
-      product.buymaProductId = buymaProductId;
-      product.buymaProductName =
-        document.querySelector('#content h1') && document.querySelector('#content h1').textContent;
-      product.today = today;
-      product.wish =
-        (document.querySelector('.topMenuWrap ul li:nth-of-type(2) span') &&
-          document
-            .querySelector('.topMenuWrap ul li:nth-of-type(2) span')
-            .textContent.replace(/,|人/g, '')) ??
-        '0';
-      product.access =
-        (document.querySelector('.topMenuWrap ul li:nth-of-type(1) a') &&
-          document
-            .querySelector('.topMenuWrap ul li:nth-of-type(1) a')
-            .textContent.replace(/,/g, '')) ??
-        '0';
-      product.link = `https://www.buyma.com/item/${buymaProductId}`;
-      return product;
-    },
-    today,
-    buymaProductId,
-  );
+  product = await page.evaluate((buymaProductId) => {
+    let product = {};
+    product.buymaProductId = buymaProductId;
+    product.buymaProductName =
+      document.querySelector('#content h1') && document.querySelector('#content h1').textContent;
+    product.wish =
+      (document.querySelector('.topMenuWrap ul li:nth-of-type(2) span') &&
+        document
+          .querySelector('.topMenuWrap ul li:nth-of-type(2) span')
+          .textContent.replace(/,|人/g, '')) ??
+      '0';
+    product.access =
+      (document.querySelector('.topMenuWrap ul li:nth-of-type(1) a') &&
+        document
+          .querySelector('.topMenuWrap ul li:nth-of-type(1) a')
+          .textContent.replace(/,/g, '')) ??
+      '0';
+    product.link = `https://www.buyma.com/item/${buymaProductId}`;
+    return product;
+  }, buymaProductId);
   totalProducts.push(product);
   await page.close();
   return totalProducts;
