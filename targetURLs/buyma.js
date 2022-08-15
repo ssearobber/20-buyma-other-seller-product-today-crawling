@@ -98,6 +98,7 @@ async function buyma() {
             let today = dayjs().format('YYYY/MM/DD HH:mm:ss');
             if (!result) {
               let dbTemObj = {};
+              dbTemObj.other_seller_id = otherSellerIdArr[k];
               dbTemObj.buyma_product_id = product.buymaProductId;
               dbTemObj.buyma_product_name = product.buymaProductName;
               dbTemObj.today = today;
@@ -125,7 +126,7 @@ async function buyma() {
             }
 
             let dbTodayObj = {};
-            dbTodayObj.other_seller_product_id = otherSellerIdArr[k];
+            dbTodayObj.other_seller_id = otherSellerIdArr[k];
             dbTodayObj.buyma_product_id = product.buymaProductId;
             dbTodayObj.buyma_product_name = product.buymaProductName;
             dbTodayObj.today = today;

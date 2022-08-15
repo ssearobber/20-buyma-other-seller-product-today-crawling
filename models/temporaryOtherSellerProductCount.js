@@ -4,6 +4,10 @@ module.exports = class TemporaryOtherSellerProductCount extends Sequelize.Model 
   static init(sequelize) {
     return super.init(
       {
+        other_seller_id: {
+          type: Sequelize.STRING(100),
+          allowNull: false,
+        },
         buyma_product_id: {
           type: Sequelize.STRING(100),
           allowNull: false,

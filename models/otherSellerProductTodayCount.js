@@ -4,7 +4,7 @@ module.exports = class OtherSellerProductTodayCount extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        other_seller_product_id: {
+        other_seller_id: {
           type: Sequelize.STRING(100),
           allowNull: false,
         },
